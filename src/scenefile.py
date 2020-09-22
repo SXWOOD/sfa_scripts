@@ -13,8 +13,9 @@ class SceneFile(object):
 
     @property
     def filename(self):
-        pattern = "{descriptor}_{task}_v{ver:03d}{ext}"
-        return pattern.format(descriptor=self.descriptor,
+        pattern = "{folder_path}{descriptor}_{task}_v{ver:03d}{ext}"
+        return pattern.format(folder_path=self.folder_path,
+                              descriptor=self.descriptor,
                               task=self.task,
                               ver=self.ver,
                               ext=self.ext)
@@ -32,5 +33,9 @@ class SceneFile(object):
 
 
 scene_file = SceneFile("D:/tank_model_v001.ma")
-print(scene_file.path)
+print(scene_file.folder_path)
+print(scene_file.descriptor)
+print(scene_file.task)
+print(scene_file.ver)
+print(scene_file.ext)
 print(scene_file.filename)
