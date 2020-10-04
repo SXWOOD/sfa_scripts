@@ -1,0 +1,19 @@
+import maya.OpenMayaUI as omui
+from PySide2 import QtWidgets
+from shiboken2 import wrapInstance
+
+def maya_main_window():
+    """Return the maya main window widget"""
+    main_window = omui.MQUtil.mainWindow()
+    
+
+class SimpleUI(QtWidgets.QDialog):
+    """Simple UI Class"""
+
+    def __init__(self):
+        """Constructor"""
+        # Passing the object SimpleUI as an argument to super()
+        # makes this line python 2 and 3 compatible
+        super(SimpleUI, self).__init__()
+        self.setWindowTitle("A Simple UI")
+
