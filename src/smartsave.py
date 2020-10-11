@@ -81,10 +81,10 @@ class SmartSaveUI(QtWidgets.QDialog):
 
     def _create_button_ui(self):
         self.save_btn = QtWidgets.QPushButton("Save")
-        self.save_increment_btn = QtWidgets.QPushButton("Save Increment")
+        self.save_inc_btn = QtWidgets.QPushButton("Save Increment")
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(self.save_btn)
-        layout.addWidget(self.save_increment_btn)
+        layout.addWidget(self.save_inc_btn)
         return layout
 
     def _create_filename_ui(self):
