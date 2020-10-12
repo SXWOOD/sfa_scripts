@@ -1,5 +1,4 @@
 import logging
-
 from PySide2 import QtWidgets, QtCore
 from shiboken2 import wrapInstance
 import maya.OpenMayaUI as omui
@@ -76,7 +75,7 @@ class SmartSaveUI(QtWidgets.QDialog):
         folder = QtWidgets.QFileDialog.getExistingDirectory(
             parent=self, caption="Select folder", dir=self.folder_le.text(),
             options=QtWidgets.QFileDialog.ShowDirsOnly |
-                    QtWidgets.QFileDialog.DontResolveSymlinks)
+            QtWidgets.QFileDialog.DontResolveSymlinks)
         self.folder_le.setText(folder)
 
     def _create_button_ui(self):
@@ -133,8 +132,7 @@ class SmartSaveUI(QtWidgets.QDialog):
 class SceneFile(object):
     """"An abstract representation of a Scene file."""
     def __init__(self, path=None):
-        self._folder_path = Path(cmds.workspace(query=True,
-                                               rootDirectory=True)) / "scenes"
+        self._folder_path = Path(cmds.workspace(query=True, rootDirectory=True)) / "scenes"
         self.descriptor = 'main'
         self.task = 'model'
         self.ver = 1
