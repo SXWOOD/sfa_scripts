@@ -24,7 +24,7 @@ class ScatterToolUI(QtWidgets.QDialog):
         super(ScatterToolUI, self).__init__(parent=maya_main_window())
         self.setWindowTitle("Scatter Tool")
         self.setMinimumWidth(500)
-        self.setMaximumHeight(200)
+        self.setMaximumHeight(300)
         self.setWindowFlags(self.windowFlags() ^
                             QtCore.Qt.WindowContextHelpButtonHint)
         self.scenefile = SceneFile()
@@ -34,7 +34,7 @@ class ScatterToolUI(QtWidgets.QDialog):
     def create_ui(self):
         self.scatter_with = self._create_scatter_with()
         self.scatter_to = self._create_scatter_to()
-        self.slider = self.create_slider()
+        self.slider = self._scale_slider()
         self.scale_min_lay = self._create_scale_min_ui()
         self.scale_max_lay = self._create_scale_max_ui()
         self.rot_min_lay = self._create_rot_min_ui()
@@ -53,7 +53,7 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.setLayout(self.main_lay)
         #self.create_slider()
 
-    def create_slider(self):
+    def _scale_slider(self):
         """Slider to change density from 0 to 100%"""
         hbox = QHBoxLayout()
 
@@ -78,7 +78,8 @@ class ScatterToolUI(QtWidgets.QDialog):
 
     def create_connections(self):
         """Connects Signals and Slots"""
-        self.folder_browse_btn.clicked.connect(self._browse_folder)
+        self.scatter_with_btn.clicked.connect(self._create_scatter_with)
+        self.scatter_to_btn.clicked.connect(self._create_scatter_to)
         self.scatter_btn.clicked.connect(self._scatter)
 
     @QtCore.Slot()
@@ -125,7 +126,7 @@ class ScatterToolUI(QtWidgets.QDialog):
         return layout
 
     def _create_scale_max_ui(self):
-        layout = self._create_xyz_headers()
+        layout = QtWidgets.QGridLayout()
         self.scale_xmax_box = QtWidgets.QLineEdit(self.scenefile.descriptor)
         self.scale_xmax_box.setFixedWidth(50)
         self.scale_ymax_box = QtWidgets.QLineEdit(self.scenefile.task)
@@ -155,7 +156,7 @@ class ScatterToolUI(QtWidgets.QDialog):
         return layout
 
     def _create_rot_max_ui(self):
-        layout = self._create_xyz_headers()
+        layout = QtWidgets.QGridLayout()
         self.rot_xmax_box = QtWidgets.QLineEdit(self.scenefile.descriptor)
         self.rot_xmax_box.setFixedWidth(50)
         self.rot_ymax_box = QtWidgets.QLineEdit(self.scenefile.task)
@@ -183,20 +184,20 @@ class ScatterToolUI(QtWidgets.QDialog):
         default_folder = Path(cmds.workspace(rootDirectory=True, query=True))
         default_folder = default_folder / "scenes"
         self.folder_le = QtWidgets.QLineEdit(default_folder)
-        self.folder_browse_btn = QtWidgets.QPushButton("Scatter With")
+        self.scatter_with_btn = QtWidgets.QPushButton("Scatter With")
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(self.folder_le)
-        layout.addWidget(self.folder_browse_btn)
+        layout.addWidget(self.scatter_with_btn)
         return layout
 
     def _create_scatter_to(self):
         default_folder = Path(cmds.workspace(rootDirectory=True, query=True))
         default_folder = default_folder / "scenes"
         self.folder_le = QtWidgets.QLineEdit(default_folder)
-        self.folder_browse_btn = QtWidgets.QPushButton("Scatter To")
+        self.scatter_to_btn = QtWidgets.QPushButton("Scatter To")
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(self.folder_le)
-        layout.addWidget(self.folder_browse_btn)
+        layout.addWidget(self.scatter_to_btn)
         return layout
 
 
@@ -204,7 +205,7 @@ class SceneFile(object):
     """"An abstract representation of a Scene file."""
     def __init__(self, path=None):
         self._folder_path = Path(cmds.workspace(query=True, rootDirectory=True)) / "scenes"
-        self.descriptor = 'main'
+        self.descriptor = '0.0'
         self.task = 'model'
         self.ver = 1
         self.ext = '.ma'
