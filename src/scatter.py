@@ -1,7 +1,5 @@
 import logging
-from PySide2 import QtWidgets, QtCore, QtGui
-from PySide2.QtWidgets import QHBoxLayout, QSlider, QLabel
-from PySide2.QtCore import Qt
+from PySide2 import QtWidgets, QtCore
 from shiboken2 import wrapInstance
 import maya.OpenMayaUI as omui
 import maya.cmds as cmds
@@ -34,7 +32,7 @@ class ScatterToolUI(QtWidgets.QDialog):
     def create_ui(self):
         self.scatter_with = self._create_scatter_with()
         self.scatter_to = self._create_scatter_to()
-        self.slider = self._scale_slider()
+        self.density_sbx = self._create_density_sbx()
         self.scale_min_lay = self._create_scale_min_ui()
         self.scale_max_lay = self._create_scale_max_ui()
         self.rot_min_lay = self._create_rot_min_ui()
@@ -43,7 +41,7 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.main_lay = QtWidgets.QVBoxLayout()
         self.main_lay.addLayout(self.scatter_with)
         self.main_lay.addLayout(self.scatter_to)
-        self.main_lay.addLayout(self.slider)
+        self.main_lay.addLayout(self.density_sbx)
         self.main_lay.addLayout(self.scale_min_lay)
         self.main_lay.addLayout(self.scale_max_lay)
         self.main_lay.addLayout(self.rot_min_lay)
@@ -51,42 +49,25 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.main_lay.addStretch()
         self.main_lay.addLayout(self.button_lay)
         self.setLayout(self.main_lay)
-        #self.create_slider()
-
-    def _scale_slider(self):
-        """Slider to change density from 0 to 100%"""
-        hbox = QHBoxLayout()
-
-        self.slider = QSlider()
-        self.slider.setOrientation(Qt.Horizontal)
-        self.slider.setMinimum(0)
-        self.slider.setMaximum(100)
-
-        self.slider.valueChanged.connect(self.change_density)
-
-        self.label = QLabel("0")
-        self.label.setFont(QtGui.QFont("Sanserif", 15))
-
-        hbox.addWidget(self.slider)
-        hbox.addWidget(self.label)
-
-        #self.setLayout(hbox)
-
-    def change_density(self):
-        size = self.slider.value()
-        self.label.setText(str(size))
 
     def create_connections(self):
         """Connects Signals and Slots"""
         self.scatter_with_btn.clicked.connect(self._create_scatter_with)
         self.scatter_to_btn.clicked.connect(self._create_scatter_to)
         self.scatter_btn.clicked.connect(self._scatter)
+        self.add_ft_btn.clicked.connect(self._add_feature)
 
     @QtCore.Slot()
     def _scatter(self):
         """Execute scatter effect"""
         self._set_scenefile_properties_from_ui()
         #self.scenefile.save()
+
+    @QtCore.Slot()
+    def _add_feature(self):
+        """Additional Feature"""
+        self._set_scenefile_properties_from_ui()
+        # self.scenefile.save()
 
     def _set_scenefile_properties_from_ui(self):
         self.scenefile.folder_path = self.folder_le.text()
@@ -106,8 +87,21 @@ class ScatterToolUI(QtWidgets.QDialog):
 
     def _create_button_ui(self):
         self.scatter_btn = QtWidgets.QPushButton("Scatter")
+        self.add_ft_btn = QtWidgets.QPushButton("Additional Feature")
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(self.scatter_btn)
+        layout.addWidget(self.add_ft_btn)
+        return layout
+
+    def _create_density_sbx(self):
+        layout = QtWidgets.QGridLayout()
+        self.dens_sbx = QtWidgets.QSpinBox()
+        self.dens_sbx.setButtonSymbols(QtWidgets.QAbstractSpinBox.PlusMinus)
+        self.dens_sbx.setFixedWidth(100)
+        self.dens_sbx.setRange(1, 100)
+        self.dens_lbl = QtWidgets.QLabel("Random Density Percentage")
+        layout.addWidget(self.dens_sbx, 1, 4)
+        layout.addWidget(self.dens_lbl, 1, 5)
         return layout
 
     def _create_scale_min_ui(self):
@@ -206,7 +200,13 @@ class SceneFile(object):
     def __init__(self, path=None):
         self._folder_path = Path(cmds.workspace(query=True, rootDirectory=True)) / "scenes"
         self.descriptor = '0.0'
-        self.task = 'model'
+        self.scale_x_min = '0.0'
+        self.scale_y_min = '0.0'
+        self.scale_z_min = '0.0'
+        self.scale_x_max = '0.0'
+        self.scale_y_max = '0.0'
+        self.scale_z_max = '0.0'
+        self.task = '0.0'
         self.ver = 1
         self.ext = '.ma'
         scene = pmc.system.sceneName()
