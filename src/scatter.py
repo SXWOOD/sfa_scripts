@@ -60,8 +60,8 @@ class ScatterToolUI(QtWidgets.QDialog):
     @QtCore.Slot()
     def _scatter(self):
         """Execute scatter effect"""
-        self._set_scenefile_properties_from_ui()
-        #self.scenefile.save()
+        #self._set_scenefile_properties_from_ui()
+        self.scatter_fx()
 
     @QtCore.Slot()
     def _add_feature(self):
@@ -193,6 +193,20 @@ class ScatterToolUI(QtWidgets.QDialog):
         layout.addWidget(self.folder_le)
         layout.addWidget(self.scatter_to_btn)
         return layout
+
+    def scatter_fx(self):
+        selection = cmds.ls(sl=True, fl=True)
+        vertex_names = cmds.filterExpand(selection, selectionMask=31, expand=True)
+
+        object_to_instance = selection[0]
+
+        if cmds.objectType(object_to_instance) == 'transform':
+            for vertex in vertex_names:
+                new_instance = cmds.instance(object_to_instance)[0]
+                position = cmds.pointPosition(vertex, w=1)
+                cmds.move(position[0], position[1], position[2], new_instance, a=1, ws=1)
+        else:
+            print("Please ensure the first object you select is a transform")
 
 
 class SceneFile(object):
