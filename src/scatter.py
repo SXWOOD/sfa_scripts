@@ -1,4 +1,4 @@
-import logging
+import logging, random
 from PySide2 import QtWidgets, QtCore
 from shiboken2 import wrapInstance
 import maya.OpenMayaUI as omui
@@ -25,7 +25,7 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.setMaximumHeight(300)
         self.setWindowFlags(self.windowFlags() ^
                             QtCore.Qt.WindowContextHelpButtonHint)
-        self.scenefile = SceneFile()
+        self.execute_scatter = ScatterFX()
         self.create_ui()
         self.create_connections()
 
@@ -70,11 +70,11 @@ class ScatterToolUI(QtWidgets.QDialog):
         # self.scenefile.save()
 
     def _set_scenefile_properties_from_ui(self):
-        self.scenefile.folder_path = self.folder_le.text()
-        self.scenefile.descriptor = self.descriptor_le.text()
-        self.scenefile.task = self.task_le.text()
-        self.scenefile.ver = self.ver_le.value()
-        self.scenefile.ext = self.ext_lbl.text()
+        self.execute_scatter.folder_path = self.folder_le.text()
+        self.execute_scatter.descriptor = self.descriptor_le.text()
+        self.execute_scatter.task = self.task_le.text()
+        self.execute_scatter.ver = self.ver_le.value()
+        self.execute_scatter.ext = self.ext_lbl.text()
 
     @QtCore.Slot()
     def _browse_folder(self):
@@ -106,11 +106,11 @@ class ScatterToolUI(QtWidgets.QDialog):
 
     def _create_scale_min_ui(self):
         layout = self._create_xyz_headers()
-        self.scale_xmin_box = QtWidgets.QLineEdit(self.scenefile.descriptor)
+        self.scale_xmin_box = QtWidgets.QLineEdit(self.execute_scatter.scale_x_min)
         self.scale_xmin_box.setFixedWidth(50)
-        self.scale_ymin_box = QtWidgets.QLineEdit(self.scenefile.task)
+        self.scale_ymin_box = QtWidgets.QLineEdit(self.execute_scatter.scale_y_min)
         self.scale_ymin_box.setFixedWidth(50)
-        self.scale_zmin_box = QtWidgets.QLineEdit(self.scenefile.descriptor)
+        self.scale_zmin_box = QtWidgets.QLineEdit(self.execute_scatter.scale_z_min)
         self.scale_zmin_box.setFixedWidth(50)
         self.scale_lbl_min = QtWidgets.QLabel("Random Scale Minimum")
         layout.addWidget(self.scale_xmin_box, 1, 0)
@@ -121,11 +121,11 @@ class ScatterToolUI(QtWidgets.QDialog):
 
     def _create_scale_max_ui(self):
         layout = QtWidgets.QGridLayout()
-        self.scale_xmax_box = QtWidgets.QLineEdit(self.scenefile.descriptor)
+        self.scale_xmax_box = QtWidgets.QLineEdit(self.execute_scatter.scale_x_max)
         self.scale_xmax_box.setFixedWidth(50)
-        self.scale_ymax_box = QtWidgets.QLineEdit(self.scenefile.task)
+        self.scale_ymax_box = QtWidgets.QLineEdit(self.execute_scatter.scale_y_max)
         self.scale_ymax_box.setFixedWidth(50)
-        self.scale_zmax_box = QtWidgets.QLineEdit(self.scenefile.descriptor)
+        self.scale_zmax_box = QtWidgets.QLineEdit(self.execute_scatter.scale_z_max)
         self.scale_zmax_box.setFixedWidth(50)
         self.scale_lbl_max = QtWidgets.QLabel("Random Scale Maximum")
         layout.addWidget(self.scale_xmax_box, 2, 0)
@@ -136,11 +136,11 @@ class ScatterToolUI(QtWidgets.QDialog):
 
     def _create_rot_min_ui(self):
         layout = self._create_xyz_headers()
-        self.rot_xmin_box = QtWidgets.QLineEdit(self.scenefile.descriptor)
+        self.rot_xmin_box = QtWidgets.QLineEdit(self.execute_scatter.rot_x_min)
         self.rot_xmin_box.setFixedWidth(50)
-        self.rot_ymin_box = QtWidgets.QLineEdit(self.scenefile.task)
+        self.rot_ymin_box = QtWidgets.QLineEdit(self.execute_scatter.rot_y_min)
         self.rot_ymin_box.setFixedWidth(50)
-        self.rot_zmin_box = QtWidgets.QLineEdit(self.scenefile.descriptor)
+        self.rot_zmin_box = QtWidgets.QLineEdit(self.execute_scatter.rot_z_min)
         self.rot_zmin_box.setFixedWidth(50)
         self.rot_lbl_min = QtWidgets.QLabel("Random Rotation Minimum")
         layout.addWidget(self.rot_xmin_box, 3, 0)
@@ -151,11 +151,11 @@ class ScatterToolUI(QtWidgets.QDialog):
 
     def _create_rot_max_ui(self):
         layout = QtWidgets.QGridLayout()
-        self.rot_xmax_box = QtWidgets.QLineEdit(self.scenefile.descriptor)
+        self.rot_xmax_box = QtWidgets.QLineEdit(self.execute_scatter.rot_x_max)
         self.rot_xmax_box.setFixedWidth(50)
-        self.rot_ymax_box = QtWidgets.QLineEdit(self.scenefile.task)
+        self.rot_ymax_box = QtWidgets.QLineEdit(self.execute_scatter.rot_y_max)
         self.rot_ymax_box.setFixedWidth(50)
-        self.rot_zmax_box = QtWidgets.QLineEdit(self.scenefile.descriptor)
+        self.rot_zmax_box = QtWidgets.QLineEdit(self.execute_scatter.rot_z_max)
         self.rot_zmax_box.setFixedWidth(50)
         self.rot_lbl_max = QtWidgets.QLabel("Random Rotation Maximum")
         layout.addWidget(self.rot_xmax_box, 3, 0)
@@ -209,20 +209,23 @@ class ScatterToolUI(QtWidgets.QDialog):
             print("Please ensure the first object you select is a transform")
 
 
-class SceneFile(object):
+class ScatterFX(object):
     """"An abstract representation of a Scene file."""
     def __init__(self, path=None):
         self._folder_path = Path(cmds.workspace(query=True, rootDirectory=True)) / "scenes"
-        self.descriptor = '0.0'
         self.scale_x_min = '0.0'
         self.scale_y_min = '0.0'
         self.scale_z_min = '0.0'
         self.scale_x_max = '0.0'
         self.scale_y_max = '0.0'
         self.scale_z_max = '0.0'
-        self.task = '0.0'
-        self.ver = 1
-        self.ext = '.ma'
+        self.rot_x_min = '0.0'
+        self.rot_y_min = '0.0'
+        self.rot_z_min = '0.0'
+        self.rot_x_max = '0.0'
+        self.rot_y_max = '0.0'
+        self.rot_z_max = '0.0'
+        #self.density = '1'
         scene = pmc.system.sceneName()
         if not path and scene:
             path = scene
