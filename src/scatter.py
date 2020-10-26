@@ -1,4 +1,5 @@
-import logging, random
+import logging
+import random
 from PySide2 import QtWidgets, QtCore
 from shiboken2 import wrapInstance
 import maya.OpenMayaUI as omui
@@ -66,10 +67,10 @@ class ScatterToolUI(QtWidgets.QDialog):
     @QtCore.Slot()
     def _add_feature(self):
         """Additional Feature"""
-        self._set_scenefile_properties_from_ui()
+        self._set_scatter_properties_from_ui()
         # self.scenefile.save()
 
-    def _set_scenefile_properties_from_ui(self):
+    def _set_scatter_properties_from_ui(self):
         self.execute_scatter.folder_path = self.folder_le.text()
         self.execute_scatter.descriptor = self.descriptor_le.text()
         self.execute_scatter.task = self.task_le.text()
@@ -104,34 +105,27 @@ class ScatterToolUI(QtWidgets.QDialog):
         layout.addWidget(self.dens_lbl, 1, 5)
         return layout
 
+
     def _create_scale_min_ui(self):
-        layout = self._create_xyz_headers()
-        self.scale_xmin_box = QtWidgets.QLineEdit(self.execute_scatter.scale_x_min)
-        self.scale_xmin_box.setFixedWidth(50)
-        self.scale_ymin_box = QtWidgets.QLineEdit(self.execute_scatter.scale_y_min)
-        self.scale_ymin_box.setFixedWidth(50)
-        self.scale_zmin_box = QtWidgets.QLineEdit(self.execute_scatter.scale_z_min)
-        self.scale_zmin_box.setFixedWidth(50)
-        self.scale_lbl_min = QtWidgets.QLabel("Random Scale Minimum")
-        layout.addWidget(self.scale_xmin_box, 1, 0)
-        layout.addWidget(self.scale_ymin_box, 1, 2)
-        layout.addWidget(self.scale_zmin_box, 1, 4)
-        layout.addWidget(self.scale_lbl_min, 1, 5)
+        layout = QtWidgets.QGridLayout()
+        self.scale_min_sbox = QtWidgets.QSpinBox()
+        self.scale_min_sbox.setButtonSymbols(QtWidgets.QAbstractSpinBox.PlusMinus)
+        self.scale_min_sbox.setFixedWidth(100)
+        self.scale_min_sbox.setRange(1, 100)
+        self.scale_min_lbl = QtWidgets.QLabel("Random Scale Minimum")
+        layout.addWidget(self.scale_min_sbox, 1, 4)
+        layout.addWidget(self.scale_min_lbl, 1, 5)
         return layout
 
     def _create_scale_max_ui(self):
         layout = QtWidgets.QGridLayout()
-        self.scale_xmax_box = QtWidgets.QLineEdit(self.execute_scatter.scale_x_max)
-        self.scale_xmax_box.setFixedWidth(50)
-        self.scale_ymax_box = QtWidgets.QLineEdit(self.execute_scatter.scale_y_max)
-        self.scale_ymax_box.setFixedWidth(50)
-        self.scale_zmax_box = QtWidgets.QLineEdit(self.execute_scatter.scale_z_max)
-        self.scale_zmax_box.setFixedWidth(50)
-        self.scale_lbl_max = QtWidgets.QLabel("Random Scale Maximum")
-        layout.addWidget(self.scale_xmax_box, 2, 0)
-        layout.addWidget(self.scale_ymax_box, 2, 2)
-        layout.addWidget(self.scale_zmax_box, 2, 4)
-        layout.addWidget(self.scale_lbl_max, 2, 5)
+        self.scale_max_sbox = QtWidgets.QSpinBox()
+        self.scale_max_sbox.setButtonSymbols(QtWidgets.QAbstractSpinBox.PlusMinus)
+        self.scale_max_sbox.setFixedWidth(100)
+        self.scale_max_sbox.setRange(1, 100)
+        self.scale_max_lbl = QtWidgets.QLabel("Random Scale Maximum")
+        layout.addWidget(self.scale_max_sbox, 1, 4)
+        layout.addWidget(self.scale_max_lbl, 1, 5)
         return layout
 
     def _create_rot_min_ui(self):
@@ -210,15 +204,11 @@ class ScatterToolUI(QtWidgets.QDialog):
 
 
 class ScatterFX(object):
-    """"An abstract representation of a Scene file."""
+    """"Code that executes the Scatter Effect with User Specified Inputs."""
     def __init__(self, path=None):
         self._folder_path = Path(cmds.workspace(query=True, rootDirectory=True)) / "scenes"
-        self.scale_x_min = '0.0'
-        self.scale_y_min = '0.0'
-        self.scale_z_min = '0.0'
-        self.scale_x_max = '0.0'
-        self.scale_y_max = '0.0'
-        self.scale_z_max = '0.0'
+        self.scale_min = '0.0'
+        self.scale_max = '0.0'
         self.rot_x_min = '0.0'
         self.rot_y_min = '0.0'
         self.rot_z_min = '0.0'
@@ -226,13 +216,13 @@ class ScatterFX(object):
         self.rot_y_max = '0.0'
         self.rot_z_max = '0.0'
         #self.density = '1'
-        scene = pmc.system.sceneName()
-        if not path and scene:
-            path = scene
-        if not path and not scene:
-            log.info("Initialize with default properties.")
-            return
-        self._init_from_path(path)
+        #scene = pmc.system.sceneName()
+        #if not path and scene:
+            #path = scene
+        #if not path and not scene:
+            #log.info("Initialize with default properties.")
+            #return
+        #self._init_from_path(path)
 
     @property
     def folder_path(self):
