@@ -22,7 +22,7 @@ class ScatterToolUI(QtWidgets.QDialog):
     def __init__(self):
         super(ScatterToolUI, self).__init__(parent=maya_main_window())
         self.setWindowTitle("Scatter Tool")
-        self.setMinimumWidth(500)
+        self.setMinimumWidth(650)
         self.setMaximumHeight(300)
         self.setWindowFlags(self.windowFlags() ^
                             QtCore.Qt.WindowContextHelpButtonHint)
@@ -31,8 +31,7 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.create_connections()
 
     def create_ui(self):
-        self.scatter_with = self._create_scatter_with()
-        self.scatter_to = self._create_scatter_to()
+        self.scatter_instructions = self._create_scatter_instruct()
         self.density_sbx = self._create_density_sbx()
         self.scale_min_lay = self._create_scale_min_ui()
         self.scale_max_lay = self._create_scale_max_ui()
@@ -40,8 +39,7 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.rot_max_lay = self._create_rot_max_ui()
         self.button_lay = self._create_button_ui()
         self.main_lay = QtWidgets.QVBoxLayout()
-        self.main_lay.addLayout(self.scatter_with)
-        self.main_lay.addLayout(self.scatter_to)
+        self.main_lay.addLayout(self.scatter_instructions)
         self.main_lay.addLayout(self.density_sbx)
         self.main_lay.addLayout(self.scale_min_lay)
         self.main_lay.addLayout(self.scale_max_lay)
@@ -53,38 +51,23 @@ class ScatterToolUI(QtWidgets.QDialog):
 
     def create_connections(self):
         """Connects Signals and Slots"""
-        self.scatter_with_btn.clicked.connect(self._create_scatter_with)
-        self.scatter_to_btn.clicked.connect(self._create_scatter_to)
+        #self.scatter_with_btn.clicked.connect(self._create_scatter_with)
         self.scatter_btn.clicked.connect(self._scatter)
         self.add_ft_btn.clicked.connect(self._add_feature)
 
     @QtCore.Slot()
     def _scatter(self):
         """Execute scatter effect"""
-        #self._set_scenefile_properties_from_ui()
+        #self._set_scatter_properties_from_ui()
         self.scatter_fx()
 
     @QtCore.Slot()
     def _add_feature(self):
         """Additional Feature"""
         self._set_scatter_properties_from_ui()
-        # self.scenefile.save()
 
     def _set_scatter_properties_from_ui(self):
         self.execute_scatter.folder_path = self.folder_le.text()
-        self.execute_scatter.descriptor = self.descriptor_le.text()
-        self.execute_scatter.task = self.task_le.text()
-        self.execute_scatter.ver = self.ver_le.value()
-        self.execute_scatter.ext = self.ext_lbl.text()
-
-    @QtCore.Slot()
-    def _browse_folder(self):
-        """Opens a dialogue box to browse the folder"""
-        folder = QtWidgets.QFileDialog.getExistingDirectory(
-            parent=self, caption="Select folder", dir=self.folder_le.text(),
-            options=QtWidgets.QFileDialog.ShowDirsOnly |
-            QtWidgets.QFileDialog.DontResolveSymlinks)
-        self.folder_le.setText(folder)
 
     def _create_button_ui(self):
         self.scatter_btn = QtWidgets.QPushButton("Scatter")
@@ -105,7 +88,6 @@ class ScatterToolUI(QtWidgets.QDialog):
         layout.addWidget(self.dens_lbl, 1, 5)
         return layout
 
-
     def _create_scale_min_ui(self):
         layout = QtWidgets.QGridLayout()
         self.scale_min_sbox = QtWidgets.QSpinBox()
@@ -123,6 +105,7 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.scale_max_sbox.setButtonSymbols(QtWidgets.QAbstractSpinBox.PlusMinus)
         self.scale_max_sbox.setFixedWidth(100)
         self.scale_max_sbox.setRange(1, 100)
+        self.scale_max_sbox.setValue(100)
         self.scale_max_lbl = QtWidgets.QLabel("Random Scale Maximum")
         layout.addWidget(self.scale_max_sbox, 1, 4)
         layout.addWidget(self.scale_max_lbl, 1, 5)
@@ -168,24 +151,12 @@ class ScatterToolUI(QtWidgets.QDialog):
         layout.addWidget(self.scale_z_lbl, 0, 4)
         return layout
 
-    def _create_scatter_with(self):
-        default_folder = Path(cmds.workspace(rootDirectory=True, query=True))
-        default_folder = default_folder / "scenes"
-        self.folder_le = QtWidgets.QLineEdit(default_folder)
-        self.scatter_with_btn = QtWidgets.QPushButton("Scatter With")
+    def _create_scatter_instruct(self):
+        self.scatter_instructions = QtWidgets.QLabel("Select polygon to Scatter With FIRST, then select vertices"
+                                                     " of second polygon to Scatter To \n")
+        self.scatter_instructions.setStyleSheet("font: bold 15px")
         layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(self.folder_le)
-        layout.addWidget(self.scatter_with_btn)
-        return layout
-
-    def _create_scatter_to(self):
-        default_folder = Path(cmds.workspace(rootDirectory=True, query=True))
-        default_folder = default_folder / "scenes"
-        self.folder_le = QtWidgets.QLineEdit(default_folder)
-        self.scatter_to_btn = QtWidgets.QPushButton("Scatter To")
-        layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(self.folder_le)
-        layout.addWidget(self.scatter_to_btn)
+        layout.addWidget(self.scatter_instructions, 0, 0)
         return layout
 
     def scatter_fx(self):
@@ -206,62 +177,9 @@ class ScatterToolUI(QtWidgets.QDialog):
 class ScatterFX(object):
     """"Code that executes the Scatter Effect with User Specified Inputs."""
     def __init__(self, path=None):
-        self._folder_path = Path(cmds.workspace(query=True, rootDirectory=True)) / "scenes"
-        self.scale_min = '0.0'
-        self.scale_max = '0.0'
         self.rot_x_min = '0.0'
         self.rot_y_min = '0.0'
         self.rot_z_min = '0.0'
         self.rot_x_max = '0.0'
         self.rot_y_max = '0.0'
         self.rot_z_max = '0.0'
-        #self.density = '1'
-        #scene = pmc.system.sceneName()
-        #if not path and scene:
-            #path = scene
-        #if not path and not scene:
-            #log.info("Initialize with default properties.")
-            #return
-        #self._init_from_path(path)
-
-    @property
-    def folder_path(self):
-        return self._folder_path
-
-    @folder_path.setter
-    def folder_path(self, val):
-        self._folder_path = Path(val)
-
-    @property
-    def filename(self):
-        pattern = "{descriptor}_{task}_v{ver:03d}{ext}"
-        return pattern.format(descriptor=self.descriptor,
-                              task=self.task,
-                              ver=self.ver,
-                              ext=self.ext)
-
-    @property
-    def path(self):
-        return self.folder_path / self.filename
-
-    def _init_from_path(self, path):
-        path = Path(path)
-        self.folder_path = path.parent
-        self.ext = path.ext
-        self.descriptor, self.task, ver = path.name.stripext().split("_")
-        self.ver = int(ver.split("v")[-1])
-
-    def save(self):
-        """Saves the scene file.
-
-        Returns:
-            Path: The path to the scene file if successful
-        """
-        try:
-            return pmc.system.saveAs(self.path)
-        except RuntimeError as err:
-            log.warning("Missing directories in path. Creating folder...")
-            self.folder_path.makedirs_p()
-            return pmc.system.saveAs(self.path)
-
-
