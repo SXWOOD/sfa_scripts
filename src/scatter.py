@@ -121,12 +121,24 @@ class ScatterToolUI(QtWidgets.QDialog):
 
     def _create_rot_min_ui(self):
         layout = self._create_xyz_headers()
-        self.rot_xmin_box = QtWidgets.QLineEdit(self.execute_scatter.rot_x_min)
+        self.rot_xmin_box = QtWidgets.QDoubleSpinBox()
         self.rot_xmin_box.setFixedWidth(50)
-        self.rot_ymin_box = QtWidgets.QLineEdit(self.execute_scatter.rot_y_min)
+        self.rot_xmin_box.setMaximum(361)
+        self.rot_xmin_box.setValue(self.set_scatter.rot_x_min)
+        self.rot_xmin_box.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+
+        self.rot_ymin_box = QtWidgets.QDoubleSpinBox()
         self.rot_ymin_box.setFixedWidth(50)
-        self.rot_zmin_box = QtWidgets.QLineEdit(self.execute_scatter.rot_z_min)
+        self.rot_ymin_box.setMaximum(361)
+        self.rot_ymin_box.setValue(self.set_scatter.rot_y_min)
+        self.rot_ymin_box.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+
+        self.rot_zmin_box = QtWidgets.QDoubleSpinBox()
         self.rot_zmin_box.setFixedWidth(50)
+        self.rot_zmin_box.setMaximum(361)
+        self.rot_zmin_box.setValue(self.set_scatter.rot_z_min)
+        self.rot_zmin_box.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+
         self.rot_lbl_min = QtWidgets.QLabel("Random Rotation Minimum")
         layout.addWidget(self.rot_xmin_box, 3, 0)
         layout.addWidget(self.rot_ymin_box, 3, 2)
@@ -136,12 +148,24 @@ class ScatterToolUI(QtWidgets.QDialog):
 
     def _create_rot_max_ui(self):
         layout = QtWidgets.QGridLayout()
-        self.rot_xmax_box = QtWidgets.QLineEdit(self.execute_scatter.rot_x_max)
+        self.rot_xmax_box = QtWidgets.QDoubleSpinBox()
         self.rot_xmax_box.setFixedWidth(50)
-        self.rot_ymax_box = QtWidgets.QLineEdit(self.execute_scatter.rot_y_max)
+        self.rot_xmax_box.setMaximum(361)
+        self.rot_xmax_box.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+        self.rot_xmax_box.setValue(self.set_scatter.rot_x_max)
+
+        self.rot_ymax_box = QtWidgets.QDoubleSpinBox()
         self.rot_ymax_box.setFixedWidth(50)
-        self.rot_zmax_box = QtWidgets.QLineEdit(self.execute_scatter.rot_z_max)
+        self.rot_ymax_box.setMaximum(361)
+        self.rot_ymax_box.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+        self.rot_ymax_box.setValue(self.set_scatter.rot_y_max)
+
+        self.rot_zmax_box = QtWidgets.QDoubleSpinBox()
         self.rot_zmax_box.setFixedWidth(50)
+        self.rot_zmax_box.setMaximum(361)
+        self.rot_zmax_box.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+        self.rot_zmax_box.setValue(self.set_scatter.rot_z_max)
+
         self.rot_lbl_max = QtWidgets.QLabel("Random Rotation Maximum")
         layout.addWidget(self.rot_xmax_box, 3, 0)
         layout.addWidget(self.rot_ymax_box, 3, 2)
