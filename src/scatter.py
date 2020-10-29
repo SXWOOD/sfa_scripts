@@ -58,7 +58,7 @@ class ScatterToolUI(QtWidgets.QDialog):
     @QtCore.Slot()
     def _scatter(self):
         """Execute scatter effect"""
-        #self._set_scatter_properties_from_ui()
+        self._set_scatter_properties_from_ui()
         self.scatter_fx()
 
     @QtCore.Slot()
@@ -67,7 +67,15 @@ class ScatterToolUI(QtWidgets.QDialog):
         self._set_scatter_properties_from_ui()
 
     def _set_scatter_properties_from_ui(self):
-        self.execute_scatter.folder_path = self.folder_le.text()
+        self.set_scatter.density_percentage = self.dens_sbx.value()
+        self.set_scatter.scale_min = self.scale_min_sbox.value()
+        self.set_scatter.scale_max = self.scale_max_sbox.value()
+        self.set_scatter.rot_x_min = self.rot_xmin_box.value()
+        self.set_scatter.rot_y_min = self.rot_ymin_box.value()
+        self.set_scatter.rot_z_min = self.rot_zmin_box.value()
+        self.set_scatter.rot_x_max = self.rot_xmax_box.value()
+        self.set_scatter.rot_y_max = self.rot_ymax_box.value()
+        self.set_scatter.rot_z_max = self.rot_zmax_box.value()
 
     def _create_button_ui(self):
         self.scatter_btn = QtWidgets.QPushButton("Scatter")
@@ -170,16 +178,27 @@ class ScatterToolUI(QtWidgets.QDialog):
                 new_instance = cmds.instance(object_to_instance)[0]
                 position = cmds.pointPosition(vertex, w=1)
                 cmds.move(position[0], position[1], position[2], new_instance, a=1, ws=1)
+
+                new_rotation = [random.uniform(self.set_scatter.rot_x_min, self.set_scatter.rot_x_max),
+                                random.uniform(self.set_scatter.rot_y_min, self.set_scatter.rot_y_max),
+                                random.uniform(self.set_scatter.rot_z_min, self.set_scatter.rot_z_max)]
+
+                cmds.rotate(new_rotation[0], new_rotation[1], new_rotation[2], new_instance, a=1, ws=1)
+
+                """Add SCALE, and DENSITY LOGIC"""
         else:
             print("Please ensure the first object you select is a transform")
 
 
 class ScatterFX(object):
-    """"Code that executes the Scatter Effect with User Specified Inputs."""
+    """"Scatter Effect Default Values."""
     def __init__(self, path=None):
-        self.rot_x_min = '0.0'
-        self.rot_y_min = '0.0'
-        self.rot_z_min = '0.0'
-        self.rot_x_max = '0.0'
-        self.rot_y_max = '0.0'
-        self.rot_z_max = '0.0'
+        self.density_percentage = 1
+        self.scale_max = 1.0
+        self.scale_min = 0.0
+        self.rot_x_min = 0.0
+        self.rot_y_min = 0.0
+        self.rot_z_min = 0.0
+        self.rot_x_max = 360.0
+        self.rot_y_max = 360.0
+        self.rot_z_max = 360.0
