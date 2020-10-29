@@ -39,19 +39,21 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.rot_max_lay = self._create_rot_max_ui()
         self.button_lay = self._create_button_ui()
         self.main_lay = QtWidgets.QVBoxLayout()
+        self.ui_add_layout()
+        self.main_lay.addStretch()
+        self.setLayout(self.main_lay)
+
+    def ui_add_layout(self):
         self.main_lay.addLayout(self.scatter_instructions)
         self.main_lay.addLayout(self.density_sbx)
         self.main_lay.addLayout(self.scale_min_lay)
         self.main_lay.addLayout(self.scale_max_lay)
         self.main_lay.addLayout(self.rot_min_lay)
         self.main_lay.addLayout(self.rot_max_lay)
-        self.main_lay.addStretch()
         self.main_lay.addLayout(self.button_lay)
-        self.setLayout(self.main_lay)
 
     def create_connections(self):
         """Connects Signals and Slots"""
-        #self.scatter_with_btn.clicked.connect(self._create_scatter_with)
         self.scatter_btn.clicked.connect(self._scatter)
         self.add_ft_btn.clicked.connect(self._add_feature)
 
@@ -139,6 +141,9 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.rot_zmin_box.setValue(self.set_scatter.rot_z_min)
         self.rot_zmin_box.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
 
+        return self.rot_min_add_widgets(layout)
+
+    def rot_min_add_widgets(self, layout):
         self.rot_lbl_min = QtWidgets.QLabel("Random Rotation Minimum")
         layout.addWidget(self.rot_xmin_box, 3, 0)
         layout.addWidget(self.rot_ymin_box, 3, 2)
@@ -166,6 +171,9 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.rot_zmax_box.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
         self.rot_zmax_box.setValue(self.set_scatter.rot_z_max)
 
+        return self.rot_max_add_widgets(layout)
+
+    def rot_max_add_widgets(self, layout):
         self.rot_lbl_max = QtWidgets.QLabel("Random Rotation Maximum")
         layout.addWidget(self.rot_xmax_box, 3, 0)
         layout.addWidget(self.rot_ymax_box, 3, 2)
@@ -209,7 +217,11 @@ class ScatterToolUI(QtWidgets.QDialog):
 
                 cmds.rotate(new_rotation[0], new_rotation[1], new_rotation[2], new_instance, a=1, ws=1)
 
-                """Add SCALE, and DENSITY LOGIC"""
+                new_scale = random.uniform(self.set_scatter.scale_min, self.set_scatter.scale_max)
+                cmds.scale(new_scale[0], new_scale[1], new_scale[2], new_instance,
+                           a=1, ws=1)
+
+                """Add DENSITY LOGIC"""
         else:
             print("Please ensure the first object you select is a transform")
 
