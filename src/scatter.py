@@ -26,7 +26,7 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.setMaximumHeight(300)
         self.setWindowFlags(self.windowFlags() ^
                             QtCore.Qt.WindowContextHelpButtonHint)
-        self.execute_scatter = ScatterFX()
+        self.set_scatter = ScatterFX()
         self.create_ui()
         self.create_connections()
 
@@ -100,10 +100,10 @@ class ScatterToolUI(QtWidgets.QDialog):
 
     def _create_scale_min_ui(self):
         layout = QtWidgets.QGridLayout()
-        self.scale_min_sbox = QtWidgets.QSpinBox()
+        self.scale_min_sbox = QtWidgets.QDoubleSpinBox()
         self.scale_min_sbox.setButtonSymbols(QtWidgets.QAbstractSpinBox.PlusMinus)
         self.scale_min_sbox.setFixedWidth(100)
-        self.scale_min_sbox.setRange(1, 100)
+        self.scale_min_sbox.setRange(0.0, 1.0)
         self.scale_min_lbl = QtWidgets.QLabel("Random Scale Minimum")
         layout.addWidget(self.scale_min_sbox, 1, 4)
         layout.addWidget(self.scale_min_lbl, 1, 5)
@@ -111,10 +111,10 @@ class ScatterToolUI(QtWidgets.QDialog):
 
     def _create_scale_max_ui(self):
         layout = QtWidgets.QGridLayout()
-        self.scale_max_sbox = QtWidgets.QSpinBox()
+        self.scale_max_sbox = QtWidgets.QDoubleSpinBox()
         self.scale_max_sbox.setButtonSymbols(QtWidgets.QAbstractSpinBox.PlusMinus)
         self.scale_max_sbox.setFixedWidth(100)
-        self.scale_max_sbox.setRange(1, 100)
+        self.scale_max_sbox.setRange(0.0, 1.0)
         self.scale_max_sbox.setValue(100)
         self.scale_max_lbl = QtWidgets.QLabel("Random Scale Maximum")
         layout.addWidget(self.scale_max_sbox, 1, 4)
@@ -218,7 +218,7 @@ class ScatterToolUI(QtWidgets.QDialog):
                 cmds.rotate(new_rotation[0], new_rotation[1], new_rotation[2], new_instance, a=1, ws=1)
 
                 new_scale = random.uniform(self.set_scatter.scale_min, self.set_scatter.scale_max)
-                cmds.scale(new_scale[0], new_scale[1], new_scale[2], new_instance,
+                cmds.scale(new_scale, new_scale, new_scale, new_instance,
                            a=1, ws=1)
 
                 """Add DENSITY LOGIC"""
