@@ -7,6 +7,7 @@ import maya.cmds as cmds
 import pymel.core as pmc
 from pymel.core.system import Path
 
+
 log = logging.getLogger(__name__)
 
 
@@ -32,7 +33,7 @@ class ScatterToolUI(QtWidgets.QDialog):
 
     def create_ui(self):
         self.scatter_instructions = self._create_scatter_instruct()
-        self.density_sbx = self._create_density_sbx()
+        self.density_sbox = self._create_density_sbox()
         self.scale_min_lay = self._create_scale_min_ui()
         self.scale_max_lay = self._create_scale_max_ui()
         self.rot_min_lay = self._create_rot_min_ui()
@@ -45,7 +46,7 @@ class ScatterToolUI(QtWidgets.QDialog):
 
     def ui_add_layout(self):
         self.main_lay.addLayout(self.scatter_instructions)
-        self.main_lay.addLayout(self.density_sbx)
+        self.main_lay.addLayout(self.density_sbox)
         self.main_lay.addLayout(self.scale_min_lay)
         self.main_lay.addLayout(self.scale_max_lay)
         self.main_lay.addLayout(self.rot_min_lay)
@@ -69,7 +70,7 @@ class ScatterToolUI(QtWidgets.QDialog):
         self._set_scatter_properties_from_ui()
 
     def _set_scatter_properties_from_ui(self):
-        self.set_scatter.density_percentage = self.dens_sbx.value()
+        self.set_scatter.density_percentage = self.dens_sbox.value()
         self.set_scatter.scale_min = self.scale_min_sbox.value()
         self.set_scatter.scale_max = self.scale_max_sbox.value()
         self.set_scatter.rot_x_min = self.rot_xmin_box.value()
@@ -87,14 +88,14 @@ class ScatterToolUI(QtWidgets.QDialog):
         layout.addWidget(self.add_ft_btn)
         return layout
 
-    def _create_density_sbx(self):
+    def _create_density_sbox(self):
         layout = QtWidgets.QGridLayout()
-        self.dens_sbx = QtWidgets.QSpinBox()
-        self.dens_sbx.setButtonSymbols(QtWidgets.QAbstractSpinBox.PlusMinus)
-        self.dens_sbx.setFixedWidth(100)
-        self.dens_sbx.setRange(1, 100)
+        self.dens_sbox = QtWidgets.QSpinBox()
+        self.dens_sbox.setButtonSymbols(QtWidgets.QAbstractSpinBox.PlusMinus)
+        self.dens_sbox.setFixedWidth(100)
+        self.dens_sbox.setRange(1, 100)
         self.dens_lbl = QtWidgets.QLabel("Random Density Percentage")
-        layout.addWidget(self.dens_sbx, 1, 4)
+        layout.addWidget(self.dens_sbox, 1, 4)
         layout.addWidget(self.dens_lbl, 1, 5)
         return layout
 
@@ -221,15 +222,19 @@ class ScatterToolUI(QtWidgets.QDialog):
                 cmds.scale(new_scale, new_scale, new_scale, new_instance,
                            a=1, ws=1)
 
-                """Add DENSITY LOGIC"""
+                random.shuffle(vertex_names)
+                number_of_points = int(len(vertex_names) * self.dens_sbox.value() / 100)
+                random_sample = random.sample(vertex_names, number_of_points)
+                print(random_sample)
+
         else:
             print("Please ensure the first object you select is a transform")
 
 
 class ScatterFX(object):
-    """"Scatter Effect Default Values."""
+    """Scatter Effect Default Values."""
     def __init__(self, path=None):
-        self.density_percentage = 1
+        self.density_percentage = 100
         self.scale_max = 1.0
         self.scale_min = 0.0
         self.rot_x_min = 0.0
