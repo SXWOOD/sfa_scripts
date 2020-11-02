@@ -1,10 +1,10 @@
-import logging
 import random
+import logging
 from PySide2 import QtWidgets, QtCore
 from shiboken2 import wrapInstance
-import maya.OpenMayaUI as omui
-import maya.cmds as cmds
 import pymel.core as pmc
+import maya.cmds as cmds
+import maya.OpenMayaUI as omui
 from pymel.core.system import Path
 
 
@@ -23,7 +23,7 @@ class ScatterToolUI(QtWidgets.QDialog):
     def __init__(self):
         super(ScatterToolUI, self).__init__(parent=maya_main_window())
         self.setWindowTitle("Scatter Tool")
-        self.setMinimumWidth(650)
+        self.setMinimumWidth(500)
         self.setMaximumHeight(300)
         self.setWindowFlags(self.windowFlags() ^
                             QtCore.Qt.WindowContextHelpButtonHint)
@@ -56,7 +56,7 @@ class ScatterToolUI(QtWidgets.QDialog):
     def create_connections(self):
         """Connects Signals and Slots"""
         self.scatter_btn.clicked.connect(self._scatter)
-        self.add_ft_btn.clicked.connect(self._add_feature)
+        self.scatter_rand_btn.clicked.connect(self._scatter_random)
 
     @QtCore.Slot()
     def _scatter(self):
@@ -65,9 +65,9 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.scatter_fx()
 
     @QtCore.Slot()
-    def _add_feature(self):
-        """Additional Feature"""
-        self._set_scatter_properties_from_ui()
+    def _scatter_random(self):
+        """Randomly Generate Numbers for Each Setting"""
+        self.randomize_values()
 
     def _set_scatter_properties_from_ui(self):
         self.set_scatter.density_percentage = self.dens_sbox.value()
@@ -81,11 +81,11 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.set_scatter.rot_z_max = self.rot_zmax_box.value()
 
     def _create_button_ui(self):
-        self.scatter_btn = QtWidgets.QPushButton("Scatter")
-        self.add_ft_btn = QtWidgets.QPushButton("Additional Feature")
+        self.scatter_btn = QtWidgets.QPushButton("Execute Scatter Effect")
+        self.scatter_rand_btn = QtWidgets.QPushButton("Randomize All Values")
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(self.scatter_btn)
-        layout.addWidget(self.add_ft_btn)
+        layout.addWidget(self.scatter_rand_btn)
         return layout
 
     def _create_density_sbox(self):
@@ -94,6 +94,7 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.dens_sbox.setButtonSymbols(QtWidgets.QAbstractSpinBox.PlusMinus)
         self.dens_sbox.setFixedWidth(100)
         self.dens_sbox.setRange(1, 100)
+        self.dens_sbox.setValue(100)
         self.dens_lbl = QtWidgets.QLabel("Random Density Percentage")
         layout.addWidget(self.dens_sbox, 1, 4)
         layout.addWidget(self.dens_lbl, 1, 5)
@@ -105,6 +106,7 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.scale_min_sbox.setButtonSymbols(QtWidgets.QAbstractSpinBox.PlusMinus)
         self.scale_min_sbox.setFixedWidth(100)
         self.scale_min_sbox.setRange(0.0, 1.0)
+        self.scale_min_sbox.setSingleStep(0.01)
         self.scale_min_lbl = QtWidgets.QLabel("Random Scale Minimum")
         layout.addWidget(self.scale_min_sbox, 1, 4)
         layout.addWidget(self.scale_min_lbl, 1, 5)
@@ -116,7 +118,8 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.scale_max_sbox.setButtonSymbols(QtWidgets.QAbstractSpinBox.PlusMinus)
         self.scale_max_sbox.setFixedWidth(100)
         self.scale_max_sbox.setRange(0.0, 1.0)
-        self.scale_max_sbox.setValue(100)
+        self.scale_max_sbox.setSingleStep(0.01)
+        self.scale_max_sbox.setValue(1.0)
         self.scale_max_lbl = QtWidgets.QLabel("Random Scale Maximum")
         layout.addWidget(self.scale_max_sbox, 1, 4)
         layout.addWidget(self.scale_max_lbl, 1, 5)
@@ -141,7 +144,6 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.rot_zmin_box.setMaximum(361)
         self.rot_zmin_box.setValue(self.set_scatter.rot_z_min)
         self.rot_zmin_box.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
-
         return self.rot_min_add_widgets(layout)
 
     def rot_min_add_widgets(self, layout):
@@ -171,7 +173,6 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.rot_zmax_box.setMaximum(361)
         self.rot_zmax_box.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
         self.rot_zmax_box.setValue(self.set_scatter.rot_z_max)
-
         return self.rot_max_add_widgets(layout)
 
     def rot_max_add_widgets(self, layout):
@@ -216,7 +217,8 @@ class ScatterToolUI(QtWidgets.QDialog):
                                 random.uniform(self.set_scatter.rot_y_min, self.set_scatter.rot_y_max),
                                 random.uniform(self.set_scatter.rot_z_min, self.set_scatter.rot_z_max)]
 
-                cmds.rotate(new_rotation[0], new_rotation[1], new_rotation[2], new_instance, a=1, ws=1)
+                cmds.rotate(new_rotation[0], new_rotation[1], new_rotation[2], new_instance,
+                            a=1, ws=1)
 
                 new_scale = random.uniform(self.set_scatter.scale_min, self.set_scatter.scale_max)
                 cmds.scale(new_scale, new_scale, new_scale, new_instance,
@@ -230,9 +232,32 @@ class ScatterToolUI(QtWidgets.QDialog):
         else:
             print("Please ensure the first object you select is a transform")
 
+    def randomize_values(self):
+        self.set_scatter.density_percentage = random.uniform(0, 100)
+        self.set_scatter.scale_min = random.uniform(0.0, 0.5)
+        self.set_scatter.scale_max = random.uniform(0.5, 1.0)
+        self.set_scatter.rot_x_min = random.uniform(0, 180)
+        self.set_scatter.rot_y_min = random.uniform(0, 180)
+        self.set_scatter.rot_z_min = random.uniform(0, 180)
+        self.set_scatter.rot_x_max = random.uniform(180, 360)
+        self.set_scatter.rot_y_max = random.uniform(180, 360)
+        self.set_scatter.rot_z_max = random.uniform(180, 360)
+        self.display_random_values()
+
+    def display_random_values(self):
+        self.dens_sbox.setValue(self.set_scatter.density_percentage)
+        self.scale_min_sbox.setValue(self.set_scatter.scale_min)
+        self.scale_max_sbox.setValue(self.set_scatter.scale_max)
+        self.rot_xmin_box.setValue(self.set_scatter.rot_x_min)
+        self.rot_ymin_box.setValue(self.set_scatter.rot_y_min)
+        self.rot_zmin_box.setValue(self.set_scatter.rot_z_min)
+        self.rot_xmax_box.setValue(self.set_scatter.rot_x_max)
+        self.rot_ymax_box.setValue(self.set_scatter.rot_y_max)
+        self.rot_zmax_box.setValue(self.set_scatter.rot_z_max)
+
 
 class ScatterFX(object):
-    """Scatter Effect Default Values."""
+    """Scatter Effect Default Values"""
     def __init__(self, path=None):
         self.density_percentage = 100
         self.scale_max = 1.0
