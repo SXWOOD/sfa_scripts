@@ -205,10 +205,14 @@ class ScatterToolUI(QtWidgets.QDialog):
         selection = cmds.ls(sl=True, fl=True)
         vertex_names = cmds.filterExpand(selection, selectionMask=31, expand=True)
 
+        random.shuffle(vertex_names)
+        number_of_points = int(len(vertex_names) * self.dens_sbox.value() / 100)
+        random_sample = random.sample(vertex_names, number_of_points)
+
         object_to_instance = selection[0]
 
         if cmds.objectType(object_to_instance) == 'transform':
-            for vertex in vertex_names:
+            for vertex in random_sample:
                 new_instance = cmds.instance(object_to_instance)[0]
                 position = cmds.pointPosition(vertex, w=1)
                 cmds.move(position[0], position[1], position[2], new_instance, a=1, ws=1)
@@ -223,14 +227,6 @@ class ScatterToolUI(QtWidgets.QDialog):
                 new_scale = random.uniform(self.set_scatter.scale_min, self.set_scatter.scale_max)
                 cmds.scale(new_scale, new_scale, new_scale, new_instance,
                            a=1, ws=1)
-
-                """
-                # Density Feature WIP
-                random.shuffle(vertex_names)
-                number_of_points = int(len(vertex_names) * self.dens_sbox.value() / 100)
-                random_sample = random.sample(vertex_names, number_of_points)
-                print(random_sample)
-                """
 
         else:
             print("Please ensure the first object you select is a transform")
