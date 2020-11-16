@@ -38,6 +38,7 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.scale_max_lay = self._create_scale_max_ui()
         self.rot_min_lay = self._create_rot_min_ui()
         self.rot_max_lay = self._create_rot_max_ui()
+        self.normals_lay = self.create_normals_checkbox()
         self.button_lay = self._create_button_ui()
         self.main_lay = QtWidgets.QVBoxLayout()
         self.ui_add_layout()
@@ -51,6 +52,7 @@ class ScatterToolUI(QtWidgets.QDialog):
         self.main_lay.addLayout(self.scale_max_lay)
         self.main_lay.addLayout(self.rot_min_lay)
         self.main_lay.addLayout(self.rot_max_lay)
+        self.main_lay.addLayout(self.normals_lay)
         self.main_lay.addLayout(self.button_lay)
 
     def create_connections(self):
@@ -201,6 +203,21 @@ class ScatterToolUI(QtWidgets.QDialog):
         layout.addWidget(self.scatter_instructions, 0, 0)
         return layout
 
+    def create_normals_checkbox(self):
+        self.normals_cbox = QCheckBox("Align to Normals", self)
+        self.normals_cbox.stateChanged.connect(self.checkbox_change)
+        self.normals_cbox.toggle()
+        layout = QtWidgets.QHBoxLayout()
+        layout.addWidget(self.normals_cbox, 5)
+        return layout
+
+    def checkbox_change(self, state):
+        if state == Qt.Checked:
+            self.align_to_normal = True
+
+        else:
+            self.align_to_normal = False
+
     def scatter_fx(self):
         selection = cmds.ls(sl=True, fl=True)
         vertex_names = cmds.filterExpand(selection, selectionMask=31, expand=True)
@@ -216,6 +233,21 @@ class ScatterToolUI(QtWidgets.QDialog):
                 new_instance = cmds.instance(object_to_instance)[0]
                 position = cmds.pointPosition(vertex, w=1)
                 cmds.move(position[0], position[1], position[2], new_instance, a=1, ws=1)
+
+                if self.align_to_normal:
+                    mesh_vert = pm.MeshVertex(vertex)
+                    vert_normal = mesh_vert.getNormal()
+                    up_vector = pm.dt.Vector(0.0, 1.0, 0.0)
+                    tangent = vert_normal.cross(up_vector).normal()
+                    tangent2 = vert_normal.cross(tangent).normal()
+                    pos = cmds.xform([vertex], query=True, worldSpace=True, translation=True)
+
+                    matrix_trans = [tangent2.x, tangent2.y, tangent2.z, 0.0,
+                                    vert_normal.x, vert_normal.y, vert_normal.z, 0.0,
+                                    tangent.x, tangent.y, tangent.z, 0.0,
+                                    pos[0], pos[1], pos[2], 1.0]
+
+                    cmds.xform(new_instance, worldSpace=True, matrix=matrix_trans)
 
                 new_rotation = [random.uniform(self.set_scatter.rot_x_min, self.set_scatter.rot_x_max),
                                 random.uniform(self.set_scatter.rot_y_min, self.set_scatter.rot_y_max),
