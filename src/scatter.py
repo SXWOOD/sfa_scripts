@@ -1,8 +1,10 @@
 import random
 import logging
 from PySide2 import QtWidgets, QtCore
+from PySide2.QtWidgets import QCheckBox
+from PySide2.QtCore import Qt
 from shiboken2 import wrapInstance
-import pymel.core as pmc
+import pymel.core as pm
 import maya.cmds as cmds
 import maya.OpenMayaUI as omui
 from pymel.core.system import Path
