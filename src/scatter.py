@@ -248,7 +248,6 @@ class ScatterToolUI(QtWidgets.QDialog):
                                     tangent.x, tangent.y, tangent.z, 0.0,
                                     pos[0], pos[1], pos[2], 1.0]
 
-                    # scatter_instance = cmds.instance(object_to_instance, name="scat_inst")
                     cmds.xform(new_instance, worldSpace=True, matrix=matrix_trans)
 
                 new_rotation = [random.uniform(self.set_scatter.rot_x_min, self.set_scatter.rot_x_max),
