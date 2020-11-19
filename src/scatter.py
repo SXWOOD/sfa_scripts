@@ -202,7 +202,7 @@ class ScatterToolUI(QtWidgets.QDialog):
                                                      " of second polygon to Scatter To \n")
         self.scatter_instructions.setStyleSheet("font: bold 15px")
         layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(self.scatter_instructions, 0, 0)
+        layout.addWidget(self.scatter_instructions, 0)
         return layout
 
     def create_normals_checkbox(self):
@@ -227,7 +227,6 @@ class ScatterToolUI(QtWidgets.QDialog):
         random.shuffle(vertex_names)
         number_of_points = int(len(vertex_names) * self.dens_sbox.value() / 100)
         random_sample = random.sample(vertex_names, number_of_points)
-
         object_to_instance = selection[0]
 
         if cmds.objectType(object_to_instance) == 'transform':
@@ -249,7 +248,8 @@ class ScatterToolUI(QtWidgets.QDialog):
                                     tangent.x, tangent.y, tangent.z, 0.0,
                                     pos[0], pos[1], pos[2], 1.0]
 
-                    cmds.xform(new_instance, worldSpace=True, matrix=matrix_trans)
+                    scatter_instance = cmds.instance(selection, name="scat_inst")
+                    cmds.xform(scatter_instance, worldSpace=True, matrix=matrix_trans)
 
                 new_rotation = [random.uniform(self.set_scatter.rot_x_min, self.set_scatter.rot_x_max),
                                 random.uniform(self.set_scatter.rot_y_min, self.set_scatter.rot_y_max),
